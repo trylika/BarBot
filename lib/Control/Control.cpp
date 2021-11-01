@@ -54,6 +54,8 @@ namespace Control {
 
     NAVROOT(nav, mainMenu, MENU_MAX_DEPTH, in, out);
 
+    config navOptions('>', '-', defaultNavCodes, true);
+
     void init() {
         pinMode(INPUT_ANALOG_PIN, INPUT);
 
@@ -67,6 +69,7 @@ namespace Control {
         nav.showTitle = true;
         nav.canExit = false;
         nav.useAccel = true;
+        options = &navOptions;
     }
 
     void readInputs() {
@@ -96,25 +99,20 @@ namespace Control {
         }
 
         switch (inputState) {
-            case INPUT_TYPE_NONE:
-                nav.doNav(navCmd(noCmd));
-                break;
             case INPUT_TYPE_SELECT:
+            case INPUT_TYPE_LEFT:
                 if (inputChangeDuration - inputLastChange < INPUT_LONG_PRESS) {
                     nav.doNav(navCmd(enterCmd));
                 }
-                break;
-            case INPUT_TYPE_LEFT:
-                nav.doNav(navCmd(leftCmd));
                 break;
             case INPUT_TYPE_RIGHT:
                 nav.doNav(navCmd(escCmd));
                 break;
             case INPUT_TYPE_UP:
-                nav.doNav(navCmd(upCmd));
+                nav.doNav(navCmd(downCmd));
                 break;
             case INPUT_TYPE_DOWN:
-                nav.doNav(navCmd(downCmd));
+                nav.doNav(navCmd(upCmd));
                 break;
         }
     }
