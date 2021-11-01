@@ -18,18 +18,18 @@ namespace Control {
         OP("Plain", poar, enterEvent)
     );
 
-    unsigned int pumpSelected = 0;
+    unsigned int pumpSelected = PUMP_MANAGER_PUMP_ALL_ID;
     SELECT(pumpSelected, pumpSelect, "Pump", doNothing, noEvent, wrapStyle,
-        VALUE("All", 0, doNothing, noEvent),
-        VALUE("First", 1, doNothing, noEvent),
-        VALUE("Second", 2, doNothing, noEvent)
+        VALUE(PUMP_MANAGER_PUMP_ALL_NAME, PUMP_MANAGER_PUMP_ALL_ID, doNothing, noEvent),
+        VALUE("1", PUMP_MANAGER_PUMP_ONE, doNothing, noEvent),
+        VALUE("2", PUMP_MANAGER_PUMP_TWO, doNothing, noEvent)
     );
 
     unsigned int pumpTime = 10;
-    MENU(pumpMenu, "Pump control", doNothing, noEvent, noStyle,
+    MENU(pumpMenu, "Pump flush", doNothing, noEvent, noStyle,
         SUBMENU(pumpSelect),
-        FIELD(pumpTime, "Time", "sec", 0, 120, 10, 5, doNothing, noEvent, noStyle),
-        OP("Run", poar, enterEvent),
+        FIELD(pumpTime, "Time", "sec", 1, 120, 10, 1, doNothing, noEvent, noStyle),
+        OP("Run", flushPump, enterEvent),
         EXIT("Back")
     );
 
@@ -132,6 +132,50 @@ namespace Control {
         nav.doOutput();
     }
 
+    result flushPump(eventMask e, prompt &item) {
+        nav.idleOn(flushingPump);
+        PumpManager::runSeries(pumpSelected, pumpTime);
+        nav.idleOff();
+
+        return proceed;
+    }
+
+    result flushingPump(menuOut& o, idleEvent e) {
+        if (e == idling) {
+            o.clear();
+            o.setCursor(0, 0);
+            o.print("Flushing...");
+            if (pumpSelected == PUMP_MANAGER_PUMP_ALL_ID) {
+                o.print("ALL");
+            } else {
+                o.print(pumpSelected);
+            }
+            o.setCursor(0, 1);
+            o.print("For ");
+            o.print(pumpTime);
+            o.print("sec");
+        }
+
+        if (e == idleEnd) {
+            o.clear();
+            o.setCursor(0, 0);
+            o.print("Flushing...");
+            o.setCursor(0, 1);
+            o.print("Done");
+            delay(1000);
+        }
+
+        return proceed;
+    }
+
+    result poar(eventMask e, prompt &item) {
+        nav.idleOn(processing);
+        delay(2000);
+        nav.idleOff();
+
+        return proceed;
+    }
+
     result processing(menuOut& o, idleEvent e) {
         if (e == idling) {
             o.clear();
@@ -149,14 +193,6 @@ namespace Control {
             o.print(":)");
             delay(1000);
         }
-
-        return proceed;
-    }
-
-    result poar(eventMask e, prompt &item) {
-        nav.idleOn(processing);
-        delay(2000);
-        nav.idleOff();
 
         return proceed;
     }

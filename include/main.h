@@ -2,7 +2,7 @@
 #define main_h
 
 #include <Arduino.h>
-#include <Pump.h>
+#include <PumpManager.h>
 #include <Control.h>
 
 void setup();

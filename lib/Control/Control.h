@@ -8,6 +8,7 @@
 #include <menuIO/chainStream.h>
 #include <menuIO/liquidCrystalOut.h>
 #include <menuIO/serialIn.h>
+#include <PumpManager.h>
 
 #define INPUT_ANALOG_PIN A0
 
@@ -32,6 +33,9 @@ namespace Control {
     void readInputs();
     int processAnalogInput(int input);
     void processOutputs();
+
+    result flushPump(eventMask e, prompt &item);
+    result flushingPump(menuOut& o, idleEvent e);
 
     result poar(eventMask e, prompt &item);
     result processing(menuOut& o, idleEvent e);
