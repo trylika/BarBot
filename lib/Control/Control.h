@@ -25,14 +25,15 @@
 #define MENU_MAX_DEPTH 4
 
 namespace Control {
-    extern unsigned int pumpSelected;
-    extern unsigned int pumpTime;
     extern unsigned int processingProgress;
 
     void init();
     void readInputs();
     int processAnalogInput(int input);
     void processOutputs();
+
+    result runForTimePump(eventMask e, prompt &item);
+    result runningForTimePump(menuOut& o, idleEvent e);
 
     result flushPump(eventMask e, prompt &item);
     result flushingPump(menuOut& o, idleEvent e);

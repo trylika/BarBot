@@ -10,6 +10,9 @@ namespace Control {
 
     LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
+    unsigned int pumpSelected = PUMP_MANAGER_PUMP_ALL_ID;
+    unsigned int pumpTime = 10;
+    unsigned int pumpDirection = PUMP_MANAGER_FORWARD;
     unsigned int processingProgress = 0;
 
     MENU(drinkMenu, "Select drink", doNothing, noEvent, wrapStyle,
@@ -18,23 +21,35 @@ namespace Control {
         OP("Plain", poar, enterEvent)
     );
 
-    unsigned int pumpSelected = PUMP_MANAGER_PUMP_ALL_ID;
     SELECT(pumpSelected, pumpSelect, "Pump", doNothing, noEvent, wrapStyle,
         VALUE(PUMP_MANAGER_PUMP_ALL_NAME, PUMP_MANAGER_PUMP_ALL_ID, doNothing, noEvent),
         VALUE("1", PUMP_MANAGER_PUMP_ONE, doNothing, noEvent),
         VALUE("2", PUMP_MANAGER_PUMP_TWO, doNothing, noEvent)
     );
 
-    unsigned int pumpTime = 10;
-    MENU(pumpMenu, "Pump flush", doNothing, noEvent, noStyle,
+    SELECT(pumpDirection, pumpDirectionSelect, "Direction", doNothing, noEvent, wrapStyle,
+        VALUE("Fwd", PUMP_MANAGER_FORWARD, doNothing, noEvent),
+        VALUE("Bck", PUMP_MANAGER_BACKWARD, doNothing, noEvent)
+    );
+
+    MENU(pumpRun, "Pump run", doNothing, noEvent, noStyle,
         SUBMENU(pumpSelect),
         FIELD(pumpTime, "Time", "sec", 1, 120, 10, 1, doNothing, noEvent, noStyle),
-        OP("Run", flushPump, enterEvent),
+        SUBMENU(pumpDirectionSelect),
+        OP("Run", runForTimePump, enterEvent),
+        EXIT("Back")
+    );
+
+    MENU(pumpFlush, "Pump flush", doNothing, noEvent, noStyle,
+        SUBMENU(pumpSelect),
+        SUBMENU(pumpDirectionSelect),
+        OP("Flush", flushPump, enterEvent),
         EXIT("Back")
     );
 
     MENU(settingsMenu, "Settings", doNothing, noEvent, noStyle,
-        SUBMENU(pumpMenu),
+        SUBMENU(pumpRun),
+        SUBMENU(pumpFlush),
         EXIT("Back")
     );
 
@@ -132,10 +147,45 @@ namespace Control {
         nav.doOutput();
     }
 
+    result runForTimePump(eventMask e, prompt &item) {
+        nav.idleOn(runningForTimePump);
+        PumpManager::runForTime(pumpSelected, pumpTime, pumpDirection);
+        nav.idleOff();
+
+        return proceed;
+    }
+
+    result runningForTimePump(menuOut& o, idleEvent e) {
+        if (e == idling) {
+            o.clear();
+            o.setCursor(0, 0);
+            o.print("Running...");
+            if (pumpSelected == PUMP_MANAGER_PUMP_ALL_ID) {
+                o.print("ALL");
+            } else {
+                o.print(pumpSelected);
+            }
+            o.setCursor(0, 1);
+            o.print("For ");
+            o.print(pumpTime);
+            o.print("sec");
+        }
+
+        if (e == idleEnd) {
+            o.clear();
+            o.setCursor(0, 0);
+            o.print("Running...");
+            o.setCursor(0, 1);
+            o.print("Done");
+            delay(1000);
+        }
+
+        return proceed;
+    }
+
     result flushPump(eventMask e, prompt &item) {
         nav.idleOn(flushingPump);
-        PumpManager::runSeries(pumpSelected, pumpTime);
-        nav.idleOff();
+        PumpManager::run(pumpSelected, pumpDirection);
 
         return proceed;
     }
@@ -151,12 +201,12 @@ namespace Control {
                 o.print(pumpSelected);
             }
             o.setCursor(0, 1);
-            o.print("For ");
-            o.print(pumpTime);
-            o.print("sec");
+            o.print("[Select] to stop");
         }
 
         if (e == idleEnd) {
+            PumpManager::stop(pumpSelected);
+
             o.clear();
             o.setCursor(0, 0);
             o.print("Flushing...");

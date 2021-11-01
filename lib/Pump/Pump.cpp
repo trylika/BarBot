@@ -13,7 +13,9 @@ Pump::Pump(
     this->pinSpeed = pinSpeed;
     this->speedTrimLow = speedTrimLow;
     this->speedTrimHigh = speedTrimHigh;
+}
 
+void Pump::begin() {
     pinMode(this->pinForward, OUTPUT);
     pinMode(this->pinBackward, OUTPUT);
     if (this->pinSpeed != PUMP_NO_SPEED) {

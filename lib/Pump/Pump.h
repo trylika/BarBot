@@ -20,6 +20,8 @@ class Pump{
             int speedTrimHigh = PUMP_SPEED_MAX
         );
 
+        void begin();
+
         void forward();
         void backward();
         void setSpeed(int speed);
