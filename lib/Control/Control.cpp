@@ -8,7 +8,7 @@ namespace Control {
     bool inputChanged = false;
     bool inputCmdLongPressProcessed = false;
 
-    LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+    LiquidCrystal_PCF8574 lcd(0x27);
 
     unsigned int pumpSelected = PUMP_MANAGER_PUMP_ALL_ID;
     unsigned int pumpTime = 10;
@@ -63,7 +63,7 @@ namespace Control {
     chainStream<0> in(NULL);
 
     MENU_OUTPUTS(out, MENU_MAX_DEPTH,
-        LIQUIDCRYSTAL_OUT(lcd, {0, 0, 16, 2}),
+        LCD_OUT(lcd, {0, 0, 20, 4}),
         NONE
     );
 
@@ -74,7 +74,10 @@ namespace Control {
     void init() {
         pinMode(INPUT_ANALOG_PIN, INPUT);
 
-        lcd.begin(16, 2);
+        lcd.begin(20, 4);
+        lcd.setBacklight(255);
+        lcd.home();
+        lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("BARBOT ;)");
         lcd.setCursor(0, 1);

@@ -3,10 +3,10 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <LiquidCrystal.h>
+#include <LiquidCrystal_PCF8574.h>
 #include <menu.h>
 #include <menuIO/chainStream.h>
-#include <menuIO/liquidCrystalOut.h>
+#include <menuIO/PCF8574Out.h>
 #include <menuIO/serialIn.h>
 #include <PumpManager.h>
 
