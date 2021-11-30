@@ -106,7 +106,7 @@ namespace Control {
         }
         inputChangeDuration = ms;
 
-        if ((inputState == INPUT_TYPE_SELECT) && (inputChangeDuration - inputLastChange >= INPUT_LONG_PRESS) && (inputCmdLongPressProcessed == false)) {
+        if ((inputState == INPUT_TYPE_ENTER) && (inputChangeDuration - inputLastChange >= INPUT_LONG_PRESS) && (inputCmdLongPressProcessed == false)) {
             inputCmdLongPressProcessed = true;
             nav.doNav(navCmd(escCmd));
             return;
@@ -117,13 +117,12 @@ namespace Control {
         }
 
         switch (inputState) {
-            case INPUT_TYPE_SELECT:
-            case INPUT_TYPE_LEFT:
+            case INPUT_TYPE_ENTER:
                 if (inputChangeDuration - inputLastChange < INPUT_LONG_PRESS) {
                     nav.doNav(navCmd(enterCmd));
                 }
                 break;
-            case INPUT_TYPE_RIGHT:
+            case INPUT_TYPE_ESC:
                 nav.doNav(navCmd(escCmd));
                 break;
             case INPUT_TYPE_UP:
@@ -136,12 +135,11 @@ namespace Control {
     }
 
     int processAnalogInput(int input) {
-        if (input > 1000) { return INPUT_TYPE_NONE; }
-        if (input < 50)   { return INPUT_TYPE_RIGHT; }
-        if (input < 250)  { return INPUT_TYPE_UP; }
-        if (input < 400)  { return INPUT_TYPE_DOWN; }
-        if (input < 555)  { return INPUT_TYPE_LEFT; }
-        if (input < 800)  { return INPUT_TYPE_SELECT; }
+        if (input > 800) { return INPUT_TYPE_NONE; }
+        if (input < 50)   { return INPUT_TYPE_ESC; }
+        if (input < 550)  { return INPUT_TYPE_UP; }
+        if (input < 700)  { return INPUT_TYPE_DOWN; }
+        if (input < 800)  { return INPUT_TYPE_ENTER; }
 
         return 0;
     }
